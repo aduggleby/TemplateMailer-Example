@@ -1,0 +1,31 @@
+{
+  "name": "react-email-starter",
+  "version": "0.0.34",
+  "private": true,
+  "scripts": {
+    "dev": "ts-node-dev --respawn index.ts",
+    "build": "rimraf dist && tsc",
+    "start": "node api/index.js",
+    "email": "email dev",
+    "export": "email export"
+  },
+  "dependencies": {
+    "@react-email/components": "^0.0.25",
+    "dotenv": "^16.4.5",
+    "dotenv-flow": "^4.1.0",
+    "express": "^4.21.0",
+    "postmark": "^4.0.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-email": "3.0.1",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.5.5",
+    "@types/react": "18.3.4",
+    "@types/react-dom": "18.3.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.6.2"
+  }
+}
