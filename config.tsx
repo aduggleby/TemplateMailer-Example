@@ -6,7 +6,9 @@ export default {
     // The email templates
     welcome: {
       email: Welcome,
-      subject: "Postmark Migration Test",
+      subject: "Postmark Migration Test: {{name}}",
+      client: "resend",
+      token: (env: any) => env.RESEND_API_KEY,
     },
   },
 };

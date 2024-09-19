@@ -1,7 +1,13 @@
 import express from "express";
 import { render } from "@react-email/components";
+
 import { ServerClient } from "postmark";
+import { Resend } from "resend";
+
 import dotenvFlow from "dotenv-flow";
+import { Liquid } from "liquidjs";
+const engine = new Liquid();
+
 import config from "./config";
 dotenvFlow.config();
 
@@ -9,8 +15,6 @@ const app = express();
 const port = 3000;
 
 app.use(express.json());
-
-const client = new ServerClient(process.env.POSTMARK_SERVER_TOKEN!);
 
 app.get("/", (req, res) => {
   res.send("TemplateMailer is running");
@@ -59,12 +63,44 @@ app.post("/", async (req, res) => {
     return res.status(400).json({ error: "TemplateName is invalid" });
   }
 
-  await client.sendEmail({
-    From: from,
-    To: to,
-    Subject: templateConfig.subject,
-    HtmlBody: await render(templateComponent(templateModel)),
-  });
+  var clientType = templateConfig.client || "postmark";
+  var clientToken =
+    templateConfig.token !== null ? templateConfig.token(process.env) : null;
+  clientToken = clientToken || process.env.POSTMARK_SERVER_TOKEN;
+
+  var subject = await engine.render(
+    engine.parse(templateConfig.subject),
+    templateModel
+  );
+
+  switch (clientType) {
+    case "postmark":
+      console.log("Sending email with Postmark");
+      var postmarkClient = new ServerClient(clientToken);
+      var postmarkResult = await postmarkClient.sendEmail({
+        From: from,
+        To: to,
+        Subject: subject,
+        HtmlBody: await render(templateComponent(templateModel)),
+      });
+      console.log(postmarkResult);
+      break;
+
+    case "resend":
+      console.log("Sending email with Resend");
+      var resendClient = new Resend(clientToken);
+      var resendResult = await resendClient.emails.send({
+        from,
+        to,
+        subject,
+        react: templateComponent(templateModel),
+      });
+      console.log(resendResult);
+      break;
+
+    default:
+      return res.status(400).json({ error: "Client not setup for this token" });
+  }
 
   console.log("Sent email.");
 
